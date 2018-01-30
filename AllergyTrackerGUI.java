@@ -1,0 +1,260 @@
+/*
+ * Name: William Chen, Marcus Ng, Matthew Deng, Ethan Tam
+ * Date: May 30th 2017
+ * Program Name: AllergyTracker
+ * Description: Classroom allergy tracker
+ */
+
+import java.awt.*;
+import java.io.*;
+import java.util.*;// scanner to get input
+import java.io.PrintWriter;
+
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.*;
+
+class AllergyTrackerGUI extends JFrame implements ActionListener {
+ 
+ //declaring java hashmap to store classrooms
+ static HashMap<Integer, Classroom> map = new HashMap<Integer, Classroom>();
+ 
+ //declare java panels
+ JPanel pan1;
+ JPanel pan1_1;
+ JPanel pan1_2;
+ JPanel pan2;
+ JPanel pan2_1;
+ JPanel pan2_2;
+ JPanel pan3;
+ JPanel pan3_1;
+ JPanel pan3_2;
+ JPanel pan4;
+
+ //declare buttons
+ JButton view;
+ JButton clear;
+ JButton add;
+ JButton toFile;
+ 
+ //declare textfield
+ JTextField input;
+
+ JLabel instructions;
+ JButton[] scheduleTemplate = new JButton[6];
+ JButton[] schedule = new JButton[6];
+ JButton[] allergy;
+ JButton title;
+ JButton title2;
+ 
+ //declare global variables
+ static int roomnum;
+ static int num;
+
+ public AllergyTrackerGUI() {
+
+  //setting properties for JFrame
+  setTitle("Classroom Allergy Tracker");
+  setSize(720, 480);
+  //setResizable(false);
+  
+  //initializing JPanels
+  pan1 = new JPanel();
+  pan1_1 = new JPanel();
+  pan1_2 = new JPanel();
+  pan2 = new JPanel();
+  pan2_1 = new JPanel();
+  pan2_2 = new JPanel();
+  pan3 = new JPanel();
+  pan3_1 = new JPanel();
+  pan3_2 = new JPanel();
+  pan4 = new JPanel();
+
+  // initializing JButtons and adding actionListener 
+  view = new JButton("View");
+  view.addActionListener(this);
+  clear = new JButton("Clear");
+  clear.addActionListener(this);
+  add = new JButton("Add Classroom");
+  add.addActionListener(this);
+  toFile = new JButton("Write this classroom to a file");
+  toFile.addActionListener(this);
+  
+  // initializing textfield, buttons, and labels
+  input = new JTextField(10);
+  title = new JButton("Schedule");
+  title.setEnabled(false);
+  title2 = new JButton("Name: Allergy");
+  title2.setEnabled(false);
+  instructions = new JLabel("Enter room number: ");
+
+  //declaring layouts
+  GridLayout layout1 = new GridLayout(2, 2);
+  GridLayout layout2 = new GridLayout(6, 1);
+  GridLayout layout3 = new GridLayout(1, 2);
+  GridLayout layout4 = new GridLayout(2, 1);
+  
+  //setting layouts
+  setLayout(layout1);
+  pan1.setLayout(layout4);
+  pan1_2.setLayout(new BorderLayout());
+  pan2.setLayout(layout4);
+  pan2_2.setLayout(new BorderLayout());
+  pan3.setLayout(layout3);
+  pan3_1.setLayout(layout2);
+  pan3_2.setLayout(layout2);
+  pan4.setLayout(layout1);
+  
+  //initializing JButton schedule array
+  for (int i = 0; i < scheduleTemplate.length; i++) {
+   scheduleTemplate[i] = new JButton("Timeslot " + (i + 1) + ":");
+   scheduleTemplate[i].setEnabled(false);// setting button to un-clickable
+   schedule[i] = new JButton();
+   schedule[i].setEnabled(false);// setting button to un-clickable
+   pan3_1.add(scheduleTemplate[i]);// adding button array to panel
+   pan3_2.add(schedule[i]);
+  }
+  
+  //adding panels 
+  pan1_1.add(instructions);
+  pan1_1.add(input);
+  pan1_1.add(view);
+  pan1_1.add(toFile);
+  pan1_2.add(title, BorderLayout.PAGE_END);
+  pan1.add(pan1_1);
+  pan2_1.add(add);
+  pan2_1.add(clear);
+  pan2_2.add(title2, BorderLayout.PAGE_END);
+  pan1.add(pan1_2);
+  pan2.add(pan2_1);
+  pan2.add(pan2_2);
+  pan3.add(pan3_1);
+  pan3.add(pan3_2);
+  
+  //adding panels to frame
+  add(pan2);
+  add(pan1);
+  add(pan3);
+  add(pan4);
+
+  setVisible(true);
+
+ }
+ 
+ // Action Listener method
+ public void actionPerformed(ActionEvent event) {
+  
+  String command = event.getActionCommand();
+  if (command.equals("Add Classroom")) {// add classroom instructions
+   
+   //using JOptionPane to get properties for new classroom 
+   String a = JOptionPane.showInputDialog(null,"Please enter the classroom number", "Classroom Number",JOptionPane.PLAIN_MESSAGE);
+   roomnum = Integer.parseInt(a);
+   map.put(roomnum, new Classroom(roomnum, new ArrayList<User>()));// creating the classroom object
+   
+   String b = JOptionPane.showInputDialog(null,"Please enter the number of students with allergies","Number of students", JOptionPane.PLAIN_MESSAGE);
+   num = Integer.parseInt(b);
+
+   for (int i = 0; i < num; i++) {
+    //using for loop and JOptionPane to add user name and allergy
+    String c = JOptionPane.showInputDialog(null,"Please enter the name of student " + (i + 1),"Name of student with Allergy",JOptionPane.PLAIN_MESSAGE);
+    String d = JOptionPane.showInputDialog(null,"Please enter the allergy of student " + (i + 1),"Allergy", JOptionPane.PLAIN_MESSAGE);
+    User u = new User(d, c);// creating new user object
+    map.get(roomnum).al.add(u);// adding user object to the classroom hashmap
+   }
+
+   String[] temp = new String[6];
+   for (int i = 0; i < 6; i++) {
+    //using JOptionPane to find out schedule for said room
+    String e = JOptionPane.showInputDialog(null,"Please enter the class subject for timeslot "+ (i + 1), "Name of class/club",JOptionPane.PLAIN_MESSAGE);
+    temp[i] = e;
+   }
+   map.get(roomnum).inputSchedule(temp);
+  }
+  if (command.equals("View")) {
+   //clearing the panels before showing new classroom information
+   pan4.removeAll();
+   pan3_2.removeAll();
+   pan4.updateUI();
+   pan3_2.updateUI();
+   pan4.revalidate();
+   pan3_2.revalidate();
+   pan4.repaint();
+   pan3_2.repaint();
+   roomnum = Integer.parseInt(input.getText());
+   
+   //if statement to make sure user entered room exists
+   if (map.containsKey(roomnum)) {
+    String[] temp = map.get(roomnum).outputSchedule();
+    for (int i = 0; i < temp.length; i++) {
+     //using JButton array to display schedule
+     schedule[i].setText(temp[i]);
+     pan3_2.add(schedule[i]);
+    }
+    num = map.get(roomnum).al.size();
+    allergy = new JButton[num];
+    for (int i = 0; i < num; i++) {
+     //using JButton array to display name and allergies
+     pan4.setLayout(new GridLayout(num, 1));
+     allergy[i] = new JButton(map.get(roomnum).al.get(i).getName()+ ": "+ map.get(roomnum).al.get(i).getAllergy());
+     allergy[i].setEnabled(false);
+     pan4.add(allergy[i]);
+    }
+   } else {
+    //if classroom does not exist output classroom does not exist
+    JLabel dne = new JLabel("Classroom does not exist");
+    pan4.add(dne);
+   }
+  }
+  if (command.equals("Clear")) {
+   //clearing the clasroom equation
+   pan4.removeAll();
+   pan3_2.removeAll();
+   pan4.updateUI();
+   pan3_2.updateUI();
+  }
+  if (command.equals("Write this classroom to a file")) {
+   roomnum = Integer.parseInt(input.getText());
+   Integer a = Integer.valueOf(roomnum);
+   //use writeToFile method 
+   try {
+    writeToFile(a);
+   } catch (Exception e) {
+    e.printStackTrace();
+   }
+
+  }
+ }
+
+ public static void main(String[] args_) throws Exception {
+  AllergyTrackerGUI frame1 = new AllergyTrackerGUI();
+
+ }
+
+ public static void writeToFile(Integer roomnumb) throws Exception { // Write to file method
+
+  // Initializing Files
+  File Allergy = new java.io.File("Class " + roomnumb + ".txt");
+  PrintWriter output = new PrintWriter(Allergy);
+
+  // Output things into the file
+  output.println("Room:" + roomnumb);
+  output.println("Schedule:");
+
+  String temp[] = map.get(roomnumb).outputSchedule(); // Store the schedule into the temp array
+  for (int i = 0; i < 6; i++) {
+   output.println("Period: " + (i + 1) + " " + temp[i]); // Add the schedule into the array
+  }
+
+  output.println("Student Name: Allergy");
+
+  for (int i = 0; i < map.get(roomnumb).al.size(); i++) {
+   output.println(map.get(roomnumb).al.get(i).getName() + ": "+ map.get(roomnumb).al.get(i).getAllergy()); // gets the stored name of the student and their// allergy
+  }
+
+  // Close the file
+  output.close();
+
+ }
+}
